@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>占卜系統｜塔羅牌 ✦ 易經卦象</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+:root{
+  --ink:#14101c;--bg:#eee7f4;--gold:#b8923a;--gold-lt:#e8d5a0;--gold-pale:#faf6eb;
+  --jade:#2a5e50;--jade-lt:#e4f0ec;--rust:#7d3520;--mist:#6b7280;--border:#d8c9e8;--card:#fffdf9;
+  --purple:#5a3d7a;--purple-lt:#ece4f2;--tarot:#4a2d6b;--iching:#8a5a2a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+header{background:var(--ink);padding:18px 20px;display:flex;align-items:center;gap:12px;}
+.logo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;width:36px;height:36px;padding:4px;border:1.5px solid var(--gold);}
+.logo span{background:var(--gold);opacity:.5;}
+.logo span:nth-child(5){opacity:1;}
+header h1{font-family:'Noto Serif TC',serif;color:var(--gold);font-size:1.05rem;letter-spacing:.1em;}
+header p{color:rgba(255,255,255,.4);font-size:.68rem;margin-top:2px;}
+.tab-bar{background:var(--ink);display:flex;border-top:1px solid rgba(255,255,255,.08);}
+.nav-a{flex:1;text-align:center;padding:10px;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:2px solid transparent;font-size:.85rem;}
+.nav-a.on{color:var(--gold);border-bottom-color:var(--gold);}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 80px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--tarot),var(--iching));}
+.card-title{font-family:'Noto Serif TC',serif;font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:14px;letter-spacing:.06em;}
+.field label{display:block;font-size:.72rem;color:var(--mist);margin-bottom:4px;}
+.field select,.field input,.field textarea{width:100%;border:1px solid var(--border);background:var(--bg);padding:9px 10px;font-family:'Noto Sans TC',sans-serif;font-size:.88rem;color:var(--ink);border-radius:4px;outline:none;}
+.field textarea{resize:none;min-height:70px;line-height:1.7;}
+.field select:focus,.field input:focus,.field textarea:focus{border-color:var(--gold);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.btn{width:100%;padding:13px;background:var(--ink);color:var(--gold);border:none;border-radius:4px;font-family:'Noto Serif TC',serif;font-size:1rem;font-weight:700;letter-spacing:.1em;cursor:pointer;margin-top:10px;}
+.btn:hover{background:#2a1f38;}
+
+/* 選擇入口 */
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.method-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:24px 14px;text-align:center;cursor:pointer;transition:all .15s;}
+.method-card:active{transform:scale(.97);}
+.method-card.tarot{border-color:var(--tarot);}
+.method-card.iching{border-color:var(--iching);}
+.method-card .mc-icon{font-size:2.2rem;margin-bottom:8px;}
+.method-card .mc-title{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1rem;margin-bottom:4px;}
+.method-card.tarot .mc-title{color:var(--tarot);}
+.method-card.iching .mc-title{color:var(--iching);}
+.method-card .mc-desc{font-size:.72rem;color:var(--mist);}
+
+/* 快速問題標籤 */
+.quick-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.qtag{padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:.78rem;cursor:pointer;background:var(--bg);color:var(--ink);}
+.qtag.sel{background:var(--purple);border-color:var(--purple);color:#fff;}
+
+/* 牌陣選擇 */
+.spread-opt{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.spread-btn{flex:1;min-width:100px;padding:12px 8px;border:1.5px solid var(--border);border-radius:6px;text-align:center;cursor:pointer;background:var(--card);font-size:.8rem;}
+.spread-btn.sel{border-color:var(--tarot);background:var(--purple-lt);color:var(--tarot);font-weight:700;}
+
+/* 塔羅牌卡片 */
+.tarot-card{background:linear-gradient(160deg,#2a1a3d 0%,var(--tarot) 100%);border:2px solid var(--gold-lt);border-radius:10px;padding:16px;margin-bottom:12px;color:#fff;}
+.tarot-card.reversed .tc-name::after{content:' (逆位)';color:#ff9d8a;font-size:.75em;}
+.tc-pos{font-size:.72rem;color:var(--gold-lt);margin-bottom:6px;letter-spacing:.05em;}
+.tc-name{font-family:'Noto Serif TC',serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;color:#fff;}
+.tc-keywords{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.tc-kw{background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px;font-size:.7rem;}
+.tc-meaning{font-size:.86rem;line-height:1.85;color:rgba(255,255,255,.92);}
+
+/* 易經爻線 */
+.hexagram-lines{display:flex;flex-direction:column-reverse;gap:8px;margin:16px 0;align-items:center;}
+.yao-line{display:flex;align-items:center;gap:12px;width:100%;max-width:280px;}
+.yao-visual{flex-shrink:0;width:100px;height:14px;position:relative;}
+.yao-visual .bar{position:absolute;top:0;height:14px;background:var(--iching);border-radius:2px;}
+.yao-visual .bar.left{left:0;}
+.yao-visual .bar.right{right:0;}
+.yao-label{font-size:.72rem;color:var(--mist);flex-shrink:0;width:50px;}
+.yao-moving{color:var(--rust);font-weight:700;font-size:.78rem;}
+
+.sec{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:18px;margin-bottom:12px;}
+.sec-head{font-family:'Noto Serif TC',serif;font-size:.9rem;font-weight:700;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-icon{width:22px;height:22px;background:var(--purple);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;}
+.sec-body{font-size:.86rem;line-height:1.95;color:#2a200e;}
+.sec-body p{margin-bottom:8px;}
+.hl{font-weight:700;color:var(--purple);}
+.gold{font-weight:700;color:var(--gold);}
+.tip{background:var(--purple-lt);border-left:3px solid var(--purple);padding:10px 14px;border-radius:0 4px 4px 0;margin-top:10px;font-size:.84rem;line-height:1.8;}
+
+.export-bar{background:var(--ink);border-radius:6px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.export-bar p{color:rgba(255,255,255,.6);font-size:.82rem;}
+.ebtn{background:var(--gold);color:var(--ink);border:none;padding:9px 16px;border-radius:4px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.backbtn{background:transparent;border:1px solid var(--border);color:var(--mist);padding:7px 14px;border-radius:4px;font-size:.8rem;cursor:pointer;margin-bottom:12px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div><h1>占卜系統</h1><p>塔羅牌 ✦ 易經銅錢卦</p></div>
+</header>
+<div class="tab-bar">
+  <a onclick="goNav('divine',this)" class="nav-a on">🔮 占卜</a>
+  <a onclick="goNav('crm',this)" class="nav-a">👤 客戶管理</a>
+</div>
+<div class="wrap">
+
+<div id="divine-view">
+
+<!-- 入口選擇 -->
+<div id="method-select">
+  <div class="card">
+    <div class="card-title">選擇占卜方式</div>
+    <div class="method-grid">
+      <div class="method-card tarot" onclick="chooseMethod('tarot')">
+        <div class="mc-icon">🃏</div>
+        <div class="mc-title">塔羅牌</div>
+        <div class="mc-desc">78張牌義<br>抽牌看指引</div>
+      </div>
+      <div class="method-card iching" onclick="chooseMethod('iching')">
+        <div class="mc-icon">☯️</div>
+        <div class="mc-title">易經銅錢卦</div>
+        <div class="mc-desc">擲卦六次<br>看卦象變化</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 問題輸入區（塔羅/易經共用） -->
+<div id="question-input" style="display:none">
+  <button class="backbtn" onclick="backToMethod()">← 返回選擇方式</button>
+  <div class="card">
+    <div class="card-title" id="qi-title">輸入問卜資料</div>
+    <div class="row2">
+      <div class="field"><label>姓名（可留白）</label><input type="text" id="q-name" placeholder="問卜者姓名"></div>
+      <div class="field"><label>今天日期</label><input type="text" id="q-date" readonly></div>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>想問什麼？</label>
+      <div class="quick-tags" id="quick-tags"></div>
+      <textarea id="q-question" placeholder="或直接輸入你想問的具體問題，例如：我跟他還有機會嗎？這份工作我該接受嗎？"></textarea>
+    </div>
+
+    <div id="tarot-spread-area" style="display:none">
+      <div class="field"><label>選擇牌陣</label></div>
+      <div class="spread-opt" id="spread-opt"></div>
+    </div>
+
+    <button class="btn" id="start-btn" onclick="startDivination()">✦ 開始占卜</button>
+  </div>
+</div>
+
+<!-- 結果顯示區 -->
+<div id="result-view" style="display:none">
+  <div class="export-bar">
+    <p id="r-title">占卜結果</p>
+    <div style="display:flex;gap:8px">
+      <button class="ebtn" onclick="copyResult()">📋 複製結果</button>
+      <button class="ebtn" onclick="window.print()">🖨 列印</button>
+    </div>
+  </div>
+  <button class="backbtn" onclick="backToMethod()">← 再占卜一次</button>
+  <div id="result-content"></div>
+</div>
+
+</div><!-- /divine-view -->
+
+<div id="crm-view" style="display:none">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:0">客戶管理</div>
+      <button onclick="openAddClient()" style="background:var(--jade);color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:.85rem;">＋ 新增客戶</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--mist);margin-bottom:14px;">與紫微、八字、靈數命盤系統共用同一份客戶資料</p>
+    <div id="client-list"></div>
+  </div>
+</div>
+
+<div id="client-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:8px;padding:24px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;">
+    <h2 id="modal-title" style="font-family:'Noto Serif TC',serif;font-size:1rem;font-weight:700;margin-bottom:16px;">新增客戶</h2>
+    <div class="row2">
+      <div class="field"><label>姓名</label><input type="text" id="c-name"></div>
+      <div class="field"><label>電話</label><input type="text" id="c-phone" placeholder="0912..."></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>出生年</label><input type="number" id="c-year" placeholder="1985"></div>
+      <div class="field"><label>備注</label><input type="text" id="c-note" placeholder="過敏、偏好、注意事項…"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button onclick="closeModal()" style="padding:9px 20px;border-radius:4px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:.85rem;">取消</button>
+      <button onclick="saveClient()" style="padding:9px 20px;border-radius:4px;border:none;background:var(--jade);color:#fff;cursor:pointer;font-size:.85rem;font-weight:700;">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 塔羅牌資料庫：22張大阿爾克那 + 56張小阿爾克那 = 78張
+// ══════════════════════════════════════════════════════════
+var TAROT_MAJOR=[
+  {name:'愚人 The Fool',kw:['新開始','冒險','天真'],up:'你正站在一段全新旅程的起點，帶著初生之犢的勇氣，不需要看清所有的路才能邁出第一步。這張牌鼓勵你相信直覺，勇敢地跳，過程中的風景比你想像中安全。',rev:'逆位的愚人提醒你，衝動行事前先想清楚，太過天真或不顧後果的冒進，可能會讓你錯過重要的細節。先停一下，再往前走。'},
+  {name:'魔術師 The Magician',kw:['創造力','行動力','掌握資源'],up:'你手上已經握有所有需要的資源和能力，現在是把想法化為行動的時候。這張牌代表你有足夠的力量去創造你想要的結果，關鍵是開始做，而不是繼續想。',rev:'逆位提醒你可能在操弄手段或缺乏誠信，也可能是能力和自信心不足，導致計畫遲遲無法落地。誠實面對自己真正的意圖。'},
+  {name:'女祭司 The High Priestess',kw:['直覺','潛意識','神秘'],up:'答案不在外面，而在你的內心深處。這張牌要你相信自己的直覺和內在的聲音，現在不是急著行動的時候，而是安靜下來聆聽的時候。',rev:'逆位代表你可能忽略了自己的直覺，或是被表面的資訊迷惑而看不清真相，也可能有秘密或隱瞞的事情需要被揭露。'},
+  {name:'皇后 The Empress',kw:['豐盛','母性','創造'],up:'豐盛與滋養的能量正圍繞著你，無論是感情、事業或創意，都處在一個成長茁壯的階段。這張牌鼓勵你享受當下的豐足，也提醒你去滋養身邊重要的人事物。',rev:'逆位可能代表過度依賴他人、缺乏自我照顧，或是創造力受阻。也可能暗示在關係中付出與獲得失衡。'},
+  {name:'皇帝 The Emperor',kw:['權威','結構','穩定'],up:'這張牌代表秩序、結構和掌控力。現在是建立穩固基礎、展現領導力的時候，用理性和紀律去達成你的目標，你有能力成為自己人生的主導者。',rev:'逆位提醒你可能過度控制或濫用權威，也可能是缺乏自律和方向感，讓事情失去掌控。'},
+  {name:'教皇 The Hierophant',kw:['傳統','信仰','指導'],up:'這張牌代表傳統智慧、體制內的學習，或尋求一位導師的指引。現在適合遵循既有的規範和經驗，從傳統的方法中找到答案。',rev:'逆位代表對傳統框架的反叛，或是質疑既有的信仰體系，也可能是墨守成規反而阻礙了你的成長。'},
+  {name:'戀人 The Lovers',kw:['愛情','選擇','和諧'],up:'這張牌代表深刻的連結與和諧的關係，也可能代表一個重要的抉擇正擺在你面前。跟隨你內心真正的價值觀去做選擇，這個選擇會反映你是誰。',rev:'逆位代表關係中的失衡、價值觀的衝突，或是難以做出承諾。也可能暗示一段關係正面臨考驗。'},
+  {name:'戰車 The Chariot',kw:['意志力','勝利','前進'],up:'憑藉強大的意志力和專注，你正朝著目標穩健前進，即使過程中有相互拉扯的力量，你都有能力駕馭並取得勝利。保持專注，成功就在前方。',rev:'逆位代表方向感的迷失、內在衝突讓你無法前進，或是過於強硬導致阻力增加，需要重新調整方向。'},
+  {name:'力量 Strength',kw:['內在力量','溫柔的堅韌','勇氣'],up:'真正的力量不是蠻力，而是溫柔而堅定的內在韌性。這張牌代表你有能力用耐心和愛去克服眼前的挑戰，不需要用強硬的方式證明自己。',rev:'逆位代表自我懷疑、缺乏信心，或是用了錯誤的方式（過度強硬或過度壓抑）去面對困難。'},
+  {name:'隱士 The Hermit',kw:['內省','獨處','智慧'],up:'現在是往內探尋、遠離喧囂的時刻。這張牌鼓勵你花時間獨處反思，你需要的答案來自內在的智慧，而不是外界的聲音。',rev:'逆位代表過度的孤立讓你與世界脫節，或是逃避面對問題，也可能是該走出來尋求連結的時候了。'},
+  {name:'命運之輪 Wheel of Fortune',kw:['變化','機運','循環'],up:'人生的循環正在轉動，一個重要的轉折點即將到來。這張牌提醒你，命運帶來的機會需要被把握，順應變化的流動，好運正在靠近。',rev:'逆位代表運勢的低潮或計畫外的阻礙，也可能是抗拒改變讓你錯過機會，學會臣服於變化的規律。'},
+  {name:'正義 Justice',kw:['公平','真相','因果'],up:'這張牌代表公平、真相與因果的法則。你先前的選擇和行動，現在會得到相應的結果。保持誠實與公正，事情會朝正確的方向發展。',rev:'逆位代表不公平的對待、逃避責任，或是決策上的偏頗，也可能暗示法律或合約糾紛需要留意。'},
+  {name:'倒吊人 The Hanged Man',kw:['暫停','犧牲','換角度看'],up:'現在不是行動的時候，而是換一個角度看事情的時候。這張牌代表暫時的停滯或犧牲，能帶來意想不到的新視野和覺悟。',rev:'逆位代表無謂的犧牲、抗拒改變視角，或是停滯不前讓你感到挫折，是時候放下執著繼續前進。'},
+  {name:'死神 Death',kw:['結束','轉變','重生'],up:'這張牌很少代表真正的死亡，而是象徵一個階段的結束和另一個新開始的誕生。放下不再適合你的事物，才能迎接蛻變後的自己。',rev:'逆位代表抗拒必要的改變、緊抓著已經結束的事物不放，這樣的執著只會讓轉變的過程更加痛苦。'},
+  {name:'節制 Temperance',kw:['平衡','調和','耐心'],up:'這張牌代表耐心、調和與中庸之道。現在適合把兩個看似對立的事物找到平衡點，穩健而不急躁地整合資源，會帶來意想不到的和諧。',rev:'逆位代表失衡、過度或不足，缺乏耐心導致的衝突，需要重新找回生活或關係中的平衡點。'},
+  {name:'惡魔 The Devil',kw:['束縛','慾望','陰影'],up:'這張牌揭示了讓你感到被困住的執念、慾望或負面模式。認清這些束縛你的鎖鏈，你會發現其實一直都有能力掙脫它們。',rev:'逆位代表開始意識到並掙脫這些束縛的過程，是釋放和解脫的開始，代表你正在打破舊有的負面循環。'},
+  {name:'高塔 The Tower',kw:['劇變','覺醒','崩塌重建'],up:'這張牌代表突如其來的劇變，可能會讓建立已久的結構瞬間崩塌。雖然過程震撼，但這往往是清除虛假基礎、迎向真實的必要過程。',rev:'逆位代表對即將到來的變化的抗拒，或是劇變的影響被延緩但終究無法避免，也可能代表從過去的崩塌中逐漸復原。'},
+  {name:'星星 The Star',kw:['希望','療癒','信心'],up:'在經歷風暴之後，這張牌帶來平靜與希望的光芒。相信自己，相信未來，你正處在一個療癒和充滿可能性的階段，美好的事情正在靠近。',rev:'逆位代表暫時失去信心或希望，感到迷失方向，但這只是暫時的，星光依然在那裡等你重新看見。'},
+  {name:'月亮 The Moon',kw:['潛意識','不安','幻象'],up:'這張牌代表迷霧與不確定性，事情的真相可能還未完全明朗，你的直覺和潛意識正試圖告訴你一些訊息。留意你的夢境和情緒反應。',rev:'逆位代表迷霧正在散去，隱藏的真相即將浮現，也可能代表你正走出一段焦慮或困惑的時期。'},
+  {name:'太陽 The Sun',kw:['喜悅','成功','活力'],up:'這是塔羅牌中最正向的牌之一，代表喜悅、成功、活力與清晰。你正處在一個充滿光明和好運的階段，盡情享受這份陽光帶來的溫暖與能量。',rev:'逆位代表暫時的陰霾遮蔽了陽光，可能是過度樂觀而忽略了細節，或是喜悅的感受被短暫延遲。'},
+  {name:'審判 Judgement',kw:['覺醒','重生','清算'],up:'這張牌代表一次重要的覺醒或清算的時刻，過去的經歷正在被重新檢視和整合。這是一個回應內心呼喚、迎接新生的關鍵時刻。',rev:'逆位代表逃避自我反省、對過去的批判過於嚴苛，或是還沒準備好面對這次的覺醒和轉變。'},
+  {name:'世界 The World',kw:['完成','圓滿','整合'],up:'這張牌代表一個完整的循環圓滿落幕，你已經走過了一段重要的旅程，達成了目標，並準備好迎接下一個新的篇章。享受這份成就感。',rev:'逆位代表事情尚未真正完成，或是缺少了最後一塊拼圖，也可能是慶祝得太早，還需要再一點努力才能真正圓滿。'}
+];
+
+var SUITS=[
+  {key:'wands',name:'權杖',element:'火',theme:'行動、熱情、事業與創造力'},
+  {key:'cups',name:'聖杯',element:'水',theme:'情感、關係、直覺與內心世界'},
+  {key:'swords',name:'寶劍',element:'風',theme:'思想、衝突、溝通與挑戰'},
+  {key:'pentacles',name:'錢幣',element:'土',theme:'財富、物質、實際與工作'}
+];
+
+var NUM_NAMES=['一','二','三','四','五','六','七','八','九','十'];
+var COURT_NAMES=[{n:'侍者',d:'學習與新的訊息'},{n:'騎士',d:'行動與追求'},{n:'皇后',d:'成熟與滋養'},{n:'國王',d:'掌控與精通'}];
+
+// 小阿爾克那牌義生成（依牌組與數字/宮廷生成獨立牌義）
+var MINOR_NUM_MEANING={
+  wands:['一個全新的靈感或機會正在萌芽，充滿創造的潛力。','兩個選項或計畫正在你手中，需要做出關於未來方向的決定。','初步的努力已經開花結果，帶著遠見繼續向前擴展。','穩固的基礎已經建立，是時候慶祝這階段性的成果。','競爭與挑戰正在考驗你，但這也是成長的必經之路。','經過努力後傳來好消息，公開的認可正在靠近。','即使壓力龐大，你仍然堅守自己的立場，捍衛重要的事物。','事情正在加速推進，訊息與行動都比預期更快到來。','雖然疲憊，但你已經接近終點，帶著累積的經驗做最後的堅持。','責任的重擔壓在肩上，是時候檢視哪些是真正該扛的、哪些該放下。'],
+  cups:['新的情感連結或深刻的感受正在你心中湧現，帶來滿滿的喜悅。','一段真誠的連結正在建立，彼此的心意逐漸靠近。','值得慶祝的時刻到來，與朋友或所愛的人共享豐盛的喜悅。','內心感到有些麻木或不滿足，即使機會就在眼前也提不起興致。','失落或後悔的情緒佔據著你，但別忘了還有其他杯子仍然滿著。','懷舊的情感湧上心頭，過去的回憶或舊識帶來溫暖也帶來省思。','太多的選擇或幻想讓你眼花撩亂，需要區分真實與空想。','儘管外在條件看似不錯，內心卻渴望更深層的意義，選擇離開追尋自我。','個人的滿足感和心願得以實現，是值得感恩的富足時刻。','情感圓滿、家庭和樂，這是內心真正渴望的幸福圖景。'],
+  swords:['一個清晰而銳利的新想法或真相突然浮現，帶來突破性的洞察。','陷入兩難的抉擇中，內心迴避著必須面對的真相。','心碎與傷痛的感受清晰而深刻，這份痛需要被承認才能療癒。','需要暫時休息與沉澱，讓身心從衝突和壓力中恢復。','衝突後留下的失落感，需要誠實檢視這場爭執真正的代價。','正在遠離動盪，朝向更平靜的水域前進，過渡期即將結束。','某種欺瞞或策略性的行動正在發生，需要留意誠信的問題。','感覺被困住、動彈不得，但其實限制大多來自於自己的想法。','焦慮和憂心讓人夜不成眠，這些恐懼多半比實際情況更誇大。','觸底的痛苦已經到達極限，但這也代表沒有比這更壞的了，新生即將開始。'],
+  pentacles:['一個實際的機會或資源正在出現，帶來物質上新的可能性。','需要在多重責任間靈活地保持平衡，考驗你的應變能力。','透過合作與專業技能，穩固的基礎正在被建立。','緊抓著擁有的資源不放，過度的安全感反而限制了成長。','物質或健康上感到匱乏，但這也是尋求並接受幫助的時刻。','施與受之間的平衡，可能是慷慨的分享或是需要接受援助。','耐心地投入努力，評估已經耕耘的成果，思考是否該調整方向。','專注而扎實地磨練技藝，一步一腳印地累積真正的實力。','憑藉自己的努力達到獨立自足的富足狀態，享受這份自給自足的成果。','家族、傳承與長遠的物質豐盛，這是辛勤努力後代代相傳的成果。']
+};
+
+function buildMinorDeck(){
+  var deck=[];
+  SUITS.forEach(function(suit){
+    for(var i=1;i<=10;i++){
+      deck.push({
+        name:suit.name+NUM_NAMES[i-1],
+        kw:[suit.element+'元素',i<=3?'開端':i<=7?'發展':'完成'],
+        up:MINOR_NUM_MEANING[suit.key][i-1],
+        rev:'逆位時，'+MINOR_NUM_MEANING[suit.key][i-1].split('，')[0]+'的能量受到阻礙或延遲，需要更留意內在的調整，或是這份能量正以較為內化、隱藏的方式在運作。'
+      });
+    }
+    COURT_NAMES.forEach(function(court){
+      deck.push({
+        name:suit.name+court.n,
+        kw:[suit.element+'元素',court.d],
+        up:'這張宮廷牌代表一位具備'+suit.theme+'特質的人物，或是你自己正展現出'+court.d+'的能量。留意生活中符合這個角色特質的人事物，他們可能帶來重要的訊息。',
+        rev:'逆位代表這股'+court.d+'的能量被誤用或壓抑，也可能提醒你留意某個人不成熟或不誠實的一面，或是你自己需要調整展現這股能量的方式。'
+      });
+    });
+  });
+  return deck;
+}
+var TAROT_MINOR=buildMinorDeck();
+var TAROT_FULL=TAROT_MAJOR.concat(TAROT_MINOR);
+
+// 牌陣定義
+var SPREADS=[
+  {id:'single',name:'單張指引',count:1,positions:['當下的指引']},
+  {id:'three',name:'三張牌陣',count:3,positions:['過去','現在','未來']},
+  {id:'love',name:'感情牌陣',count:3,positions:['你的心意','對方的心意','關係的走向']},
+  {id:'choice',name:'抉擇牌陣',count:3,positions:['選項A','選項B','你內心真正的傾向']}
+];
+
+// ══════════════════════════════════════════════════════════
+// 易經六十四卦資料庫
+// ══════════════════════════════════════════════════════════
+// 卦序依「上卦+下卦」的八卦組合決定，這裡用二進位表示：1=陽(—) 0=陰(--)
+// 八卦：乾111 兌110 離101 震100 巽011 坎010 艮001 坤000（由下往上）
+var BAGUA_NAMES={'111':'乾','110':'兌','101':'離','100':'震','011':'巽','010':'坎','001':'艮','000':'坤'};
+var BAGUA_NATURE={'乾':'天','兌':'澤','離':'火','震':'雷','巽':'風','坎':'水','艮':'山','坤':'地'};
+
+var HEXAGRAM_DATA={
+  '111111':{name:'乾為天',judge:'元亨利貞。至剛至健，自強不息的能量貫穿全卦，代表事業與志向都有非常強勁的推動力，適合主動出擊、積極進取，但也要留意過剛則折，行事不宜過於躁進逼人。'},
+  '000000':{name:'坤為地',judge:'元亨，利牝馬之貞。厚德載物，代表柔順、包容、承載萬物的能量，這個時機適合以柔克剛，順勢而為，不宜強出頭，踏實耕耘會有豐厚的回報。'},
+  '100010':{name:'水雷屯',judge:'元亨利貞，勿用有攸往。萬事起頭難，代表眼前正處在創業維艱、百廢待興的階段，宜守正待時，尋求貴人相助，不宜躁進猛衝。'},
+  '010001':{name:'山水蒙',judge:'亨。匪我求童蒙，童蒙求我。代表啟蒙、學習的階段，事情尚未明朗，需要虛心求教、耐心學習，主動追求答案反而不如靜待時機、讓答案自然浮現。'},
+  '111010':{name:'水天需',judge:'有孚，光亨，貞吉。代表等待的智慧，時機尚未成熟，需要耐心等候，保持誠信與內心的光明，該來的自然會來，不需強求。'},
+  '010111':{name:'天水訟',judge:'有孚窒惕，中吉終凶。代表爭訟、衝突的能量，即使理直也要謹慎行事，中途調解為吉，若堅持爭到底反而會有不好的結果，宜和解不宜硬碰硬。'},
+  '010000':{name:'地水師',judge:'貞，丈人吉無咎。代表統御、動員眾人的能量，需要有德行和能力的人來領導，行事需要紀律和正當性，方能無往不利。'},
+  '000010':{name:'水地比',judge:'吉。原筮元永貞，無咎。代表親近、團結、依附的能量，適合尋求合作、建立聯盟，誠心誠意地與人親近會帶來吉祥，但要盡早行動，猶豫觀望反而不利。'},
+  '111011':{name:'風天小畜',judge:'亨。密雲不雨，自我西郊。代表能量正在積蓄但尚未爆發，像密佈的雲還未降雨，需要繼續累積實力，時機未到不宜躁進，小有積蓄但大事仍需等待。'},
+  '110111':{name:'天澤履',judge:'履虎尾，不咥人，亨。代表謹慎行走在危險邊緣，如同踩著老虎的尾巴，只要小心翼翼、態度謙和，就能化險為夷、平安通過。'},
+  '000111':{name:'地天泰',judge:'小往大來，吉亨。代表天地交泰、上下溝通順暢的極佳狀態，這是大吉之卦，各方面的能量都處在通達、和諧、欣欣向榮的階段，好好把握這個順風期。'},
+  '111000':{name:'天地否',judge:'否之匪人，不利君子貞。代表閉塞不通、上下不交流的狀態，此時諸事不宜躁進，宜韜光養晦、堅守正道，等待否極泰來的轉機。'},
+  '111101':{name:'天火同人',judge:'同人于野，亨。代表志同道合、廣結善緣的能量，適合開誠布公地與人合作，在寬闊的格局下團結眾人，會帶來亨通的結果。'},
+  '101111':{name:'火天大有',judge:'元亨。代表大豐收、大擁有的極佳狀態，這是非常吉祥的卦象，事業、財富都可能有豐碩的成果，但也要記得謙虛感恩，不可驕矜自滿。'},
+  '001000':{name:'地山謙',judge:'亨，君子有終。代表謙虛、低調的美德，這是六十四卦中少見的全卦皆吉之卦，保持謙遜的態度做人做事，最終必能有好的結果。'},
+  '000100':{name:'雷地豫',judge:'利建侯行師。代表歡樂、順勢而為的能量，適合開展新計畫、建立團隊或組織，順應時勢、預先做好準備，會帶來喜悅的成果。'},
+  '100110':{name:'澤雷隨',judge:'元亨利貞，無咎。代表隨順時勢、跟隨潮流的智慧，懂得適時調整自己去配合大環境的變化，只要秉持正道，隨和而不隨便，就能無災無咎。'},
+  '011001':{name:'山風蠱',judge:'元亨，利涉大川。代表積弊已久、需要整頓革新的狀態，過去累積的問題需要被正視和處理，雖然辛苦但整頓過後會帶來新的生機，適合展開改革行動。'},
+  '110000':{name:'地澤臨',judge:'元亨利貞，至于八月有凶。代表居高臨下、督導管理的能量，眼前形勢大好、適合積極拓展，但也要居安思危，提防盛極而衰的轉折。'},
+  '000011':{name:'風地觀',judge:'盥而不薦，有孚顒若。代表觀察、省思的階段，此時不宜躁動，適合靜下心來觀察局勢的變化，以誠敬謙卑的心態面對，會看清事情的本質。'},
+  '100101':{name:'火雷噬嗑',judge:'亨，利用獄。代表排除障礙、明辨是非的能量，眼前有需要處理的阻礙或糾紛，需要果斷、公正地處理，才能讓事情順利通過。'},
+  '101001':{name:'山火賁',judge:'亨，小利有攸往。代表裝飾、文采、外在形象的能量，此時適合修飾包裝、注重外在表現，但也要記得內在的實質才是根本，不可本末倒置。'},
+  '000001':{name:'山地剝',judge:'不利有攸往。代表剝落、衰退的階段，眼前形勢不利於主動出擊，宜靜觀其變、保存實力，等待陽氣回升的時機到來。'},
+  '100000':{name:'地雷復',judge:'亨。出入無疾，朋來無咎。代表一元復始、否極泰來的轉機，經歷過低谷之後，新的生機正在萌芽，適合休養生息，等待陽氣逐漸壯大。'},
+  '100111':{name:'天雷無妄',judge:'元亨利貞，其匪正有眚。代表順應自然、不妄為的智慧，此時最重要的是保持真誠正直，不要有非分之想或投機取巧，順其自然反而能亨通。'},
+  '111001':{name:'山天大畜',judge:'利貞，不家食吉，利涉大川。代表大量的累積和蓄養，過去的努力和學習正在累積成雄厚的實力，適合把握機會向外發展，大展身手的時機已經成熟。'},
+  '100001':{name:'山雷頤',judge:'貞吉。觀頤，自求口實。代表頤養、飲食、修身的能量，此時要注意言語和飲食的節制，用正確的方式滋養自己和他人，才能維持長久的吉祥。'},
+  '011110':{name:'澤風大過',judge:'棟橈，利有攸往。代表非常態、超出負荷的階段，如同房屋棟樑彎曲，情況較為特殊或壓力較大，但只要謹慎應對，仍然利於有所作為。'},
+  '010010':{name:'坎為水',judge:'習坎，有孚，維心亨。代表重重險阻、接連的挑戰，如同水流不斷遭遇險境，此時最重要的是保持內心的誠信與堅定，才能一次次地渡過難關。'},
+  '101101':{name:'離為火',judge:'利貞，亨。畜牝牛吉。代表光明、依附、文明的能量，如同火焰需要依附燃料才能發光，此時適合依循正道、發揮所長，保持柔順的態度會帶來吉祥。'},
+  '001110':{name:'澤山咸',judge:'亨，利貞，取女吉。代表感應、心意相通的能量，特別是在感情關係上，雙方的心意正在自然地交流互動，秉持正道會帶來美好的結合。'},
+  '011100':{name:'雷風恆',judge:'亨，無咎，利貞。代表恆久、持之以恆的能量，適合維持長久穩定的關係或事業方向，堅持正道、不輕易改變，才能長長久久。'},
+  '111100':{name:'天山遯',judge:'亨，小利貞。代表退避、隱退的智慧，眼前形勢不利於強出頭，適合暫時退讓、保存實力，以柔和的方式處理當下的局面。'},
+  '001111':{name:'雷天大壯',judge:'利貞。代表力量強盛、氣勢壯大的階段，行事要注意適度節制，避免因為過於強盛而躁進莽撞，剛正而不魯莽才能長保優勢。'},
+  '000101':{name:'火地晉',judge:'康侯用錫馬蕃庶，晝日三接。代表晉升、前進、光明日盛的能量，如同旭日東昇，此時適合積極進取、爭取升遷或拓展的機會，運勢正在向上。'},
+  '101000':{name:'地火明夷',judge:'利艱貞。代表光明受損、韜光養晦的階段，眼前環境較為不利，適合暫時隱藏鋒芒、堅守內心的正直，靜待時機好轉再展露才華。'},
+  '101011':{name:'風火家人',judge:'利女貞。代表家庭、內部關係的和諧經營，此時適合把重心放在家庭或核心團隊的凝聚上，各司其職、彼此扶持，會帶來安定和諧。'},
+  '110101':{name:'火澤睽',judge:'小事吉。代表分歧、對立的狀態，眼前可能存在一些意見不合或誤解，不適合處理大事，宜先從小事開始修復關係，逐步化解分歧。'},
+  '001010':{name:'水山蹇',judge:'利西南，不利東北，利見大人。代表艱難、險阻重重的處境，眼前的路走起來辛苦，適合尋求貴人相助，暫緩前進的腳步，先求自保再圖發展。'},
+  '010100':{name:'雷水解',judge:'利西南，無所往，其來復吉。代表解除、化解危機的能量，過去的困境和壓力正在逐漸緩解，這是撥雲見日的階段，適合把握機會恢復元氣。'},
+  '110001':{name:'山澤損',judge:'有孚，元吉，無咎，可貞。代表減損、犧牲小我成就大我的智慧，此時可能需要付出或捨棄一些東西，但只要出於真誠，最終會帶來大吉的結果。'},
+  '100011':{name:'風雷益',judge:'利有攸往，利涉大川。代表增益、獲得幫助的能量，眼前是適合擴展、投資或開展新計畫的好時機，會得到來自各方的支持與助力。'},
+  '111110':{name:'澤天夬',judge:'揚于王庭，孚號有厲。代表決斷、當機立斷排除障礙的時刻，眼前需要果斷處理累積已久的問題，公開且正大光明地行動，雖有風險但勢在必行。'},
+  '011111':{name:'天風姤',judge:'女壯，勿用取女。代表不期而遇、意外相逢的能量，需要謹慎面對突如其來的人事物，尤其感情或合作關係，不宜過快下決定或投入。'},
+  '000110':{name:'澤地萃',judge:'亨。王假有廟，利見大人。代表聚集、匯聚力量的能量，適合召集眾人、整合資源，共同的目標會凝聚起強大的力量，利於尋求有力人士的協助。'},
+  '011000':{name:'地風升',judge:'元亨，用見大人，勿恤。代表上升、循序漸進的成長，如同樹木從地底向上生長，此時運勢正穩步向上，不需過度擔憂，持續累積會有好的發展。'},
+  '010110':{name:'澤水困',judge:'亨，貞，大人吉，無咎。代表困頓、資源匱乏的處境，眼前面臨一些限制和挑戰，但只要秉持正道、堅守信念，有德行的人依然能突破困境。'},
+  '011010':{name:'水風井',judge:'改邑不改井。代表源源不絕、滋養眾人的能量，如同水井供應著源源不絕的水源，此時適合建立能夠長久造福他人的根基，不隨外在環境輕易改變。'},
+  '101110':{name:'澤火革',judge:'己日乃孚，元亨利貞，悔亡。代表變革、革新的能量，舊有的制度或關係需要改變，時機成熟時大膽變革會帶來新生，但變革前要先取得眾人的信任。'},
+  '011101':{name:'火風鼎',judge:'元吉，亨。代表鼎新、建立新秩序的能量，如同古代鼎器象徵著權威與穩定，此時適合建立新的制度、團隊或關係，穩固地開創新局。'},
+  '100100':{name:'震為雷',judge:'亨。震來虩虩，笑言啞啞。代表震動、驚醒的能量，突如其來的變化或消息可能讓人一時驚慌，但只要保持鎮定，最終仍會恢復平靜、化險為夷。'},
+  '001001':{name:'艮為山',judge:'艮其背，不獲其身。代表停止、靜止如山的能量，此時適合停下腳步、內觀自省，不被外界的紛擾牽動，安定沉穩地面對眼前的處境。'},
+  '001011':{name:'風山漸',judge:'女歸吉，利貞。代表循序漸進、按部就班的能量，事情的發展需要時間醞釀，不宜躁進，穩紮穩打、一步一步地推進，最終會漸入佳境。'},
+  '110100':{name:'雷澤歸妹',judge:'征凶，無攸利。代表衝動決定、不按常理出牌的狀態，尤其在關係的建立上，若操之過急或名不正言不順，恐怕會帶來不利的結果，宜三思而後行。'},
+  '101100':{name:'雷火豐',judge:'亨，王假之，勿憂，宜日中。代表豐盛、盛大的階段，如同日正當中，事業或聲望正達到高峰，把握這個豐收的時機，但也要留意盛極必衰的道理。'},
+  '001101':{name:'火山旅',judge:'小亨，旅貞吉。代表旅行、漂泊不定的狀態，此時可能處在一個不熟悉或暫時的環境中，適合保持謙和謹慎的態度，客隨主便才能平安順利。'},
+  '011011':{name:'巽為風',judge:'小亨，利有攸往，利見大人。代表順從、滲透、柔軟推進的能量，如同風無孔不入，此時適合以柔軟謙遜的方式漸漸推展計畫，不宜強硬對抗。'},
+  '110110':{name:'兌為澤',judge:'亨，利貞。代表喜悅、溝通、和悅待人的能量，此時人際關係和諧愉快，適合透過溝通交流化解問題，保持真誠喜悅的心態會帶來好的互動。'},
+  '010011':{name:'風水渙',judge:'亨。王假有廟，利涉大川。代表渙散、離散後重新凝聚的能量，眼前可能面臨人心渙散或關係疏離的狀況，需要有效的方法重新凝聚向心力。'},
+  '110010':{name:'水澤節',judge:'亨。苦節不可貞。代表節制、有度的能量，適度的節制和規範會帶來亨通，但過度嚴苛的節制反而會帶來痛苦，凡事適可而止才是智慧。'},
+  '110011':{name:'風澤中孚',judge:'豚魚吉，利涉大川，利貞。代表誠信、真心誠意感通萬物的能量，只要秉持內心的真誠，即使面對艱難的處境，也能感動他人、順利渡過難關。'},
+  '001100':{name:'雷山小過',judge:'亨，利貞，可小事，不可大事。代表小的過度、需要謹慎的階段，此時適合處理小事，謙卑行事、不宜好高騖遠，稍安勿躁會更為妥當。'},
+  '101010':{name:'水火既濟',judge:'亨小，利貞，初吉終亂。代表大功告成、階段性完成的狀態，事情看似圓滿落定，但要提防因為鬆懈而由盛轉衰，居安思危、持續謹慎才能保持成果。'},
+  '010101':{name:'火水未濟',judge:'亨，小狐汔濟，濡其尾，無攸利。代表尚未完成、仍需努力的階段，事情還沒有到達終點，如同小狐狸渡河卻弄濕了尾巴，需要更謹慎地堅持到最後。'}
+};
+
+// ══════════════════════════════════════════════════════════
+// 全域狀態
+// ══════════════════════════════════════════════════════════
+var currentMethod=null;
+var selectedSpread=null;
+var currentQuestionCategory=null;
+var lastResult=null;
+
+var QUICK_QUESTIONS={
+  love:'我的感情狀況會怎麼發展？',
+  career:'這份工作/事業適合我嗎？',
+  money:'最近的財運如何？',
+  health:'我該注意哪些身心狀況？',
+  choice:'我該如何在這個抉擇中做決定？'
+};
+
+document.getElementById('q-date').value=new Date().toLocaleDateString('zh-TW');
+
+function chooseMethod(method){
+  currentMethod=method;
+  document.getElementById('method-select').style.display='none';
+  document.getElementById('question-input').style.display='';
+  document.getElementById('qi-title').textContent=method==='tarot'?'塔羅牌占卜':'易經銅錢卦占卜';
+  document.getElementById('tarot-spread-area').style.display=method==='tarot'?'':'none';
+
+  var qtEl=document.getElementById('quick-tags');
+  qtEl.innerHTML='';
+  var labels={love:'💕 感情',career:'💼 事業',money:'💰 財運',health:'🌿 健康',choice:'🤔 抉擇'};
+  Object.keys(labels).forEach(function(k){
+    var tag=document.createElement('div');
+    tag.className='qtag';
+    tag.textContent=labels[k];
+    tag.onclick=function(){ selectQuickTag(k, tag); };
+    qtEl.appendChild(tag);
+  });
+
+  if(method==='tarot'){
+    var spEl=document.getElementById('spread-opt');
+    spEl.innerHTML='';
+    SPREADS.forEach(function(sp){
+      var btn=document.createElement('div');
+      btn.className='spread-btn';
+      btn.textContent=sp.name;
+      btn.onclick=function(){
+        document.querySelectorAll('.spread-btn').forEach(function(b){b.classList.remove('sel');});
+        btn.classList.add('sel');
+        selectedSpread=sp.id;
+      };
+      spEl.appendChild(btn);
+    });
+    selectedSpread='three';
+    spEl.children[1].classList.add('sel');
+  }
+}
+
+function backToMethod(){
+  document.getElementById('method-select').style.display='';
+  document.getElementById('question-input').style.display='none';
+  document.getElementById('result-view').style.display='none';
+  document.getElementById('q-question').value='';
+  document.querySelectorAll('.qtag').forEach(function(t){t.classList.remove('sel');});
+}
+
+function selectQuickTag(key, el){
+  document.querySelectorAll('.qtag').forEach(function(t){t.classList.remove('sel');});
+  el.classList.add('sel');
+  currentQuestionCategory=key;
+  document.getElementById('q-question').value=QUICK_QUESTIONS[key];
+}
+
+function startDivination(){
+  var question=document.getElementById('q-question').value.trim();
+  if(!question){ alert('請輸入或選擇想問的問題'); return; }
+  var name=document.getElementById('q-name').value.trim()||'匿名';
+
+  if(currentMethod==='tarot'){
+    doTarotDraw(name, question);
+  } else {
+    doIchingCast(name, question);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 塔羅抽牌邏輯
+// ══════════════════════════════════════════════════════════
+function shuffleDeck(){
+  var deck=TAROT_FULL.slice();
+  for(var i=deck.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=deck[i]; deck[i]=deck[j]; deck[j]=tmp;
+  }
+  return deck;
+}
+
+function doTarotDraw(name, question){
+  var spread=SPREADS.find(function(s){return s.id===selectedSpread;})||SPREADS[1];
+  var deck=shuffleDeck();
+  var drawn=[];
+  for(var i=0;i<spread.count;i++){
+    var card=deck[i];
+    var reversed=Math.random()<0.45;
+    drawn.push({card:card, reversed:reversed, position:spread.positions[i]});
+  }
+
+  lastResult={type:'tarot', name:name, question:question, spread:spread, cards:drawn, date:new Date().toLocaleDateString('zh-TW')};
+
+  var html='<div class="sec" style="background:linear-gradient(160deg,var(--ink) 0%,var(--tarot) 100%);border-color:var(--gold-lt);">';
+  html+='<div class="sec-body" style="color:rgba(255,255,255,.85);font-size:.85rem">';
+  html+='<p><strong style="color:var(--gold-lt)">'+name+'</strong>　'+new Date().toLocaleDateString('zh-TW')+'</p>';
+  html+='<p style="margin-top:6px">問卜：「'+question+'」</p>';
+  html+='<p style="margin-top:4px;font-size:.78rem;color:rgba(255,255,255,.6)">牌陣：'+spread.name+'</p>';
+  html+='</div></div>';
+
+  drawn.forEach(function(d,i){
+    html+='<div class="tarot-card'+(d.reversed?' reversed':'')+'">';
+    html+='<div class="tc-pos">位置 '+(i+1)+'：'+d.position+'</div>';
+    html+='<div class="tc-name">'+d.card.name+'</div>';
+    html+='<div class="tc-keywords">'+d.card.kw.map(function(k){return '<span class="tc-kw">'+k+'</span>';}).join('')+'</div>';
+    html+='<div class="tc-meaning">'+(d.reversed?d.card.rev:d.card.up)+'</div>';
+    html+='</div>';
+  });
+
+  html+='<div class="sec"><div class="sec-head"><div class="sec-icon">✦</div>整體指引</div><div class="sec-body">';
+  html+='<p>'+genTarotSummary(drawn, spread)+'</p>';
+  html+='</div></div>';
+
+  document.getElementById('r-title').textContent=name+'的塔羅牌占卜結果';
+  document.getElementById('result-content').innerHTML=html;
+  document.getElementById('question-input').style.display='none';
+  document.getElementById('result-view').style.display='';
+  document.getElementById('result-view').scrollIntoView({behavior:'smooth'});
+}
+
+function genTarotSummary(drawn, spread){
+  var majorCount=drawn.filter(function(d){return TAROT_MAJOR.indexOf(d.card)>=0;}).length;
+  var reversedCount=drawn.filter(function(d){return d.reversed;}).length;
+  var summary='';
+  if(majorCount===drawn.length&&drawn.length>1){
+    summary+='這次抽到的牌全部都是大阿爾克那，代表這個問題牽涉到人生中相當重要的課題和轉折，不是日常瑣事層級的問題，值得你認真看待和思考。';
+  } else if(majorCount===0){
+    summary+='這次抽到的都是小阿爾克那，代表眼前的狀況更多是日常生活層面的具體情境，答案往往藏在細節的行動和選擇裡。';
+  } else {
+    summary+='這次的牌組合大小阿爾克那都有，代表這個問題既有具體的日常層面，也牽動著更深層的人生課題，兩者互相影響。';
+  }
+  if(reversedCount>=Math.ceil(drawn.length/2)&&drawn.length>1){
+    summary+=' 逆位牌偏多，提醒你現在可能有些內在的阻礙或尚未顯化的能量，事情的發展可能會比預期更需要耐心，也可能有些狀況需要先向內看清楚，才能真正往前走。';
+  } else if(reversedCount===0&&drawn.length>1){
+    summary+=' 全部都是正位牌，代表能量流動順暢，牌面訊息會相對直接地反映在現實中，是適合積極行動的訊號。';
+  }
+  return summary;
+}
+
+// ══════════════════════════════════════════════════════════
+// 易經銅錢卦邏輯
+// ══════════════════════════════════════════════════════════
+// 三枚銅錢：正面(字)=3，反面=2。三次加總：6=老陰(動)，7=少陽，8=少陰，9=老陽(動)
+function tossCoins(){
+  var sum=0;
+  for(var i=0;i<3;i++){ sum += Math.random()<0.5 ? 3 : 2; }
+  return sum; // 6,7,8,9
+}
+
+function doIchingCast(name, question){
+  var lines=[]; // 由下往上：{value:6/7/8/9, yang:bool, moving:bool}
+  for(var i=0;i<6;i++){
+    var v=tossCoins();
+    var yang=(v===7||v===9);
+    var moving=(v===6||v===9);
+    lines.push({value:v, yang:yang, moving:moving});
+  }
+
+  // 本卦二進位字串（由下往上）
+  var benGuaKey=lines.map(function(l){return l.yang?'1':'0';}).join('');
+  // 上卦=後三碼(4,5,6爻)，下卦=前三碼(1,2,3爻)
+  var lowerKey=benGuaKey.substring(0,3);
+  var upperKey=benGuaKey.substring(3,6);
+
+  var benGua=HEXAGRAM_DATA[benGuaKey]||{name:BAGUA_NAMES[upperKey]+BAGUA_NAMES[lowerKey],judge:'（此卦組合為'+BAGUA_NAMES[upperKey]+'上'+BAGUA_NAMES[lowerKey]+'下，卦辭資料庫尚未完整收錄此卦，請參考上下卦的基本卦德進行解讀。）'};
+
+  // 變卦（動爻陰陽互變）
+  var hasMoving=lines.some(function(l){return l.moving;});
+  var zhiGuaKey=lines.map(function(l){return l.moving?(l.yang?'0':'1'):(l.yang?'1':'0');}).join('');
+  var zhiGua=hasMoving?(HEXAGRAM_DATA[zhiGuaKey]||{name:'（變卦組合尚未收錄）',judge:''}):null;
+
+  lastResult={type:'iching', name:name, question:question, lines:lines, benGua:benGua, zhiGua:zhiGua, hasMoving:hasMoving, date:new Date().toLocaleDateString('zh-TW')};
+
+  var html='<div class="sec" style="background:linear-gradient(160deg,var(--ink) 0%,var(--iching) 100%);border-color:var(--gold-lt);">';
+  html+='<div class="sec-body" style="color:rgba(255,255,255,.85);font-size:.85rem">';
+  html+='<p><strong style="color:var(--gold-lt)">'+name+'</strong>　'+new Date().toLocaleDateString('zh-TW')+'</p>';
+  html+='<p style="margin-top:6px">問卜：「'+question+'」</p>';
+  html+='</div></div>';
+
+  html+='<div class="sec"><div class="sec-head"><div class="sec-icon">☯</div>本卦：'+benGua.name+'</div><div class="sec-body">';
+  html+='<div class="hexagram-lines">';
+  for(var i=5;i>=0;i--){
+    var l=lines[i];
+    html+='<div class="yao-line">';
+    html+='<div class="yao-label">第'+(i+1)+'爻'+(l.moving?' <span class="yao-moving">●動</span>':'')+'</div>';
+    html+='<div class="yao-visual">';
+    if(l.yang){ html+='<div class="bar" style="width:100px;left:0"></div>'; }
+    else { html+='<div class="bar left" style="width:44px"></div><div class="bar right" style="width:44px"></div>'; }
+    html+='</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+  html+='<p style="margin-top:10px"><span class="hl">卦辭：</span>'+benGua.judge+'</p>';
+  html+='</div></div>';
+
+  if(hasMoving&&zhiGua){
+    html+='<div class="sec"><div class="sec-head"><div class="sec-icon">➜</div>變卦：'+zhiGua.name+'</div><div class="sec-body">';
+    html+='<p style="font-size:.82rem;color:var(--mist);margin-bottom:8px">動爻代表事情正在變化中，本卦看現況，變卦看未來的發展趨勢。</p>';
+    html+='<p>'+zhiGua.judge+'</p>';
+    html+='</div></div>';
+  } else {
+    html+='<div class="sec"><div class="sec-body"><p style="font-size:.85rem;color:var(--mist)">這次沒有動爻，代表事情目前處於相對穩定的狀態，本卦的卦辭就是完整的答案，不會有進一步的變化趨勢。</p></div></div>';
+  }
+
+  html+='<div class="tip">易經卦象給的是「勢」的判斷——目前情況的趨勢和道理，不是絕對的吉凶預言。真正的智慧在於看懂這個「勢」之後，你選擇怎麼順勢而為或修正調整。</div>';
+
+  document.getElementById('r-title').textContent=name+'的易經卦象結果';
+  document.getElementById('result-content').innerHTML=html;
+  document.getElementById('question-input').style.display='none';
+  document.getElementById('result-view').style.display='';
+  document.getElementById('result-view').scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════
+// 複製與導覽
+// ══════════════════════════════════════════════════════════
+function copyText(t){if(!t||!t.trim()){alert('尚無結果');return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){alert('已複製！');}).catch(function(){fbCopy(t);});}else{fbCopy(t);}}
+function fbCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');alert('已複製！');}catch(e){alert('請手動複製');}document.body.removeChild(ta);}
+function copyResult(){
+  var el=document.getElementById('result-content');
+  if(!el) return;
+  copyText((el.innerText||el.textContent).trim());
+}
+
+function goNav(view, el){
+  document.querySelectorAll('.nav-a').forEach(function(a){
+    a.classList.remove('on');
+    a.style.color='rgba(255,255,255,.5)';
+    a.style.borderBottomColor='transparent';
+  });
+  el.classList.add('on');
+  el.style.color='var(--gold)';
+  el.style.borderBottomColor='var(--gold)';
+  document.getElementById('divine-view').style.display = view==='divine' ? '' : 'none';
+  document.getElementById('crm-view').style.display = view==='crm' ? '' : 'none';
+  if(view==='crm') renderClients();
+}
+
+// ══════════════════════════════════════════════════════════
+// CRM（與其他命盤系統共用同一份 localStorage 客戶資料）
+// ══════════════════════════════════════════════════════════
+var clients=JSON.parse(localStorage.getItem('mp_clients')||'[]');
+var editIdx=-1;
+
+function renderClients(){
+  var el=document.getElementById('client-list');
+  if(!clients.length){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--mist);font-size:.88rem;">尚未新增任何客戶</div>';
+    return;
+  }
+  el.innerHTML='';
+  clients.forEach(function(c,i){
+    var div=document.createElement('div');
+    div.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;';
+    div.innerHTML='<div><h3 style="font-size:.92rem;font-weight:700;margin-bottom:4px;">'+c.name+'</h3>'+
+      '<p style="font-size:.78rem;color:var(--mist);line-height:1.6;">'+(c.phone||'')+(c.note?' ｜ '+c.note:'')+'</p></div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0;">'+
+      '<button onclick="loadClientToDivine('+i+')" style="padding:6px 12px;border:1px solid var(--tarot);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--tarot);color:#fff;">占卜</button>'+
+      '<button onclick="editClient('+i+')" style="padding:6px 12px;border:1px solid var(--border);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--bg);">編輯</button>'+
+      '<button onclick="delClient('+i+')" style="padding:6px 12px;border:1px solid var(--border);border-radius:3px;font-size:.75rem;cursor:pointer;background:var(--bg);">刪除</button>'+
+      '</div>';
+    el.appendChild(div);
+  });
+}
+function openAddClient(){
+  editIdx=-1;
+  document.getElementById('modal-title').textContent='新增客戶';
+  ['c-name','c-phone','c-year','c-note'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('client-modal').style.display='flex';
+}
+function editClient(i){
+  editIdx=i;
+  var c=clients[i];
+  document.getElementById('modal-title').textContent='編輯客戶';
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-year').value=c.year||'';
+  document.getElementById('c-note').value=c.note||'';
+  document.getElementById('client-modal').style.display='flex';
+}
+function closeModal(){ document.getElementById('client-modal').style.display='none'; }
+function saveClient(){
+  var c={
+    name:document.getElementById('c-name').value.trim(),
+    phone:document.getElementById('c-phone').value.trim(),
+    year:document.getElementById('c-year').value.trim(),
+    note:document.getElementById('c-note').value.trim()
+  };
+  if(!c.name){alert('請輸入姓名');return;}
+  if(editIdx>=0){ c=Object.assign({},clients[editIdx],c); clients[editIdx]=c; }
+  else clients.push(c);
+  localStorage.setItem('mp_clients',JSON.stringify(clients));
+  closeModal();
+  renderClients();
+}
+function delClient(i){
+  if(!confirm('確定刪除「'+clients[i].name+'」？')) return;
+  clients.splice(i,1);
+  localStorage.setItem('mp_clients',JSON.stringify(clients));
+  renderClients();
+}
+function loadClientToDivine(i){
+  var c=clients[i];
+  goNav('divine', document.querySelectorAll('.nav-a')[0]);
+  document.getElementById('q-name').value=c.name||'';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
