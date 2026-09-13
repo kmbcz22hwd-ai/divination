@@ -262,6 +262,49 @@ function buildMinorDeck(){
 var TAROT_MINOR=buildMinorDeck();
 var TAROT_FULL=TAROT_MAJOR.concat(TAROT_MINOR);
 
+// 白話建議對照：把牌義轉譯成貼近提問方式的直接建議
+var MAJOR_ACTION={
+  '愚人 The Fool':'go','魔術師 The Magician':'go','女祭司 The High Priestess':'wait',
+  '皇后 The Empress':'go','皇帝 The Emperor':'go','教皇 The Hierophant':'neutral',
+  '戀人 The Lovers':'go','戰車 The Chariot':'go','力量 Strength':'go',
+  '隱士 The Hermit':'wait','命運之輪 Wheel of Fortune':'go','正義 Justice':'neutral',
+  '倒吊人 The Hanged Man':'wait','死神 Death':'wait','節制 Temperance':'neutral',
+  '惡魔 The Devil':'no','高塔 The Tower':'no','星星 The Star':'go',
+  '月亮 The Moon':'wait','太陽 The Sun':'go','審判 Judgement':'go','世界 The World':'go'
+};
+var MINOR_ACTION={
+  wands:['go','neutral','go','go','neutral','go','neutral','go','neutral','neutral'],
+  cups:['go','go','go','no','no','neutral','neutral','wait','go','go'],
+  swords:['neutral','no','no','wait','no','wait','no','no','no','neutral'],
+  pentacles:['go','neutral','go','no','wait','neutral','neutral','go','go','go']
+};
+
+function getCardAction(card, reversed){
+  var action='neutral';
+  var majorIdx=TAROT_MAJOR.indexOf(card);
+  if(majorIdx>=0){
+    action=MAJOR_ACTION[card.name]||'neutral';
+  } else {
+    // 判斷屬於哪個花色與數字/宮廷
+    var found=false;
+    SUITS.forEach(function(suit){
+      if(found) return;
+      for(var i=1;i<=10;i++){
+        if(card.name===suit.name+NUM_NAMES[i-1]){
+          action=MINOR_ACTION[suit.key][i-1];
+          found=true;
+        }
+      }
+    });
+    if(!found) action='neutral'; // 宮廷牌代表人物或能量，不直接給行動建議
+  }
+  // 逆位修正：正向傾向的能量被阻礙或延遲，下修一級
+  if(reversed){
+    if(action==='go') action='neutral';
+  }
+  return action;
+}
+
 // 牌陣定義
 var SPREADS=[
   {id:'single',name:'單張指引',count:1,positions:['當下的指引']},
@@ -343,6 +386,80 @@ var HEXAGRAM_DATA={
   '001100':{name:'雷山小過',judge:'亨，利貞，可小事，不可大事。代表小的過度、需要謹慎的階段，此時適合處理小事，謙卑行事、不宜好高騖遠，稍安勿躁會更為妥當。'},
   '101010':{name:'水火既濟',judge:'亨小，利貞，初吉終亂。代表大功告成、階段性完成的狀態，事情看似圓滿落定，但要提防因為鬆懈而由盛轉衰，居安思危、持續謹慎才能保持成果。'},
   '010101':{name:'火水未濟',judge:'亨，小狐汔濟，濡其尾，無攸利。代表尚未完成、仍需努力的階段，事情還沒有到達終點，如同小狐狸渡河卻弄濕了尾巴，需要更謹慎地堅持到最後。'}
+};
+
+// 白話建議對照表：把卦辭轉譯成貼近提問方式的直接建議
+var HEXAGRAM_ADVICE={
+  '乾為天':{action:'go',tip:'積極行動的時機，但別過於強硬逼人。'},
+  '坤為地':{action:'wait',tip:'宜以柔順配合，不建議主動出擊。'},
+  '水雷屯':{action:'wait',tip:'時機還不成熟，先按兵不動、尋求協助比較好。'},
+  '山水蒙':{action:'wait',tip:'宜先觀察學習，不急著行動或下決定。'},
+  '水天需':{action:'wait',tip:'耐心等待比較好，時機未到不要強求。'},
+  '天水訟':{action:'no',tip:'不建議硬碰硬，宜和解退讓，不適合現在做。'},
+  '地水師':{action:'neutral',tip:'需要有紀律、有原則地行動才會順利。'},
+  '水地比':{action:'go',tip:'適合主動親近、尋求合作，宜盡早行動。'},
+  '風天小畜':{action:'wait',tip:'能量還在累積，時機尚未成熟，再等等。'},
+  '天澤履':{action:'neutral',tip:'可以做，但要格外謹慎小心，步步為營。'},
+  '地天泰':{action:'go',tip:'非常好的時機，可以放心大膽去做。'},
+  '天地否':{action:'no',tip:'不建議此時行動，宜守成、暫緩計畫。'},
+  '天火同人':{action:'go',tip:'適合坦誠溝通、合作去做。'},
+  '火天大有':{action:'go',tip:'大好時機，可以去做，但別忘了謙虛。'},
+  '地山謙':{action:'go',tip:'只要保持謙遜的態度，這麼做會有好結果。'},
+  '雷地豫':{action:'go',tip:'適合開始新計畫，順勢而為去做。'},
+  '澤雷隨':{action:'go',tip:'適合順應當下的情勢調整後再行動。'},
+  '山風蠱':{action:'neutral',tip:'需要先處理積累已久的問題，之後才會順利。'},
+  '地澤臨':{action:'go',tip:'形勢大好，可以去做，但要留意別過頭。'},
+  '風地觀':{action:'wait',tip:'先觀察局勢比較好，暫時不宜貿然行動。'},
+  '火雷噬嗑':{action:'neutral',tip:'中間有障礙需要先處理清楚才能繼續。'},
+  '山火賁':{action:'neutral',tip:'外在條件不錯，但別忽略了真正的重點。'},
+  '山地剝':{action:'no',tip:'情勢不利，不建議此時行動，宜暫緩。'},
+  '地雷復':{action:'wait',tip:'新的生機正在萌芽，宜休養等待它壯大。'},
+  '天雷無妄':{action:'neutral',tip:'保持真誠自然地去做即可，不要有太多心機。'},
+  '山天大畜':{action:'go',tip:'實力已經累積足夠，適合放手去做。'},
+  '山雷頤':{action:'neutral',tip:'注意言行分寸，適度而為即可。'},
+  '澤風大過':{action:'neutral',tip:'情況比較特殊，需要謹慎，但仍然可以進行。'},
+  '坎為水':{action:'no',tip:'眼前重重險阻，此時不建議貿然行動。'},
+  '離為火':{action:'neutral',tip:'依循正道、保持柔順地去做會比較順利。'},
+  '澤山咸':{action:'go',tip:'這個時機很適合，可以主動去做。'},
+  '雷風恆':{action:'go',tip:'適合維持現狀或穩定推進，不宜躁進改變。'},
+  '天山遯':{action:'no',tip:'此時宜退讓保留，不建議強出頭去做。'},
+  '雷天大壯':{action:'neutral',tip:'可以行動，但要節制，別太衝動躁進。'},
+  '火地晉':{action:'go',tip:'適合積極爭取，運勢正在上升，可以做。'},
+  '地火明夷':{action:'no',tip:'環境對你不利，宜韜光養晦，不建議此時行動。'},
+  '風火家人':{action:'go',tip:'適合經營內部關係，這是不錯的時機。'},
+  '火澤睽':{action:'no',tip:'目前存在一些分歧，先別處理重大的事。'},
+  '水山蹇':{action:'no',tip:'眼前艱難，宜先尋求幫助，暫緩行動。'},
+  '雷水解':{action:'go',tip:'危機正在解除，適合把握機會行動。'},
+  '山澤損':{action:'neutral',tip:'可能需要有所付出或犧牲，只要出於真心就值得。'},
+  '風雷益':{action:'go',tip:'適合進行，會得到助力和支持，可以去做。'},
+  '澤天夬':{action:'neutral',tip:'該做的決斷，正大光明地去做即可。'},
+  '天風姤':{action:'no',tip:'這是意外的際遇，建議先別急著投入。'},
+  '澤地萃':{action:'go',tip:'適合召集整合、共同去做，時機不錯。'},
+  '地風升':{action:'go',tip:'運勢正在上升，持續累積會有成果，可以做。'},
+  '澤水困':{action:'no',tip:'眼前受到限制，建議先守住原則、等待突破。'},
+  '水風井':{action:'neutral',tip:'適合做能夠長久經營的事，不求速成。'},
+  '澤火革':{action:'neutral',tip:'改變的時機到了，但要先取得對方的信任。'},
+  '火風鼎':{action:'go',tip:'適合建立新的開始，穩健地去做。'},
+  '震為雷':{action:'neutral',tip:'可能會有意外或驚動，保持鎮定應對即可。'},
+  '艮為山':{action:'wait',tip:'適合先停下來、向內反省，不建議貿然行動。'},
+  '風山漸':{action:'go',tip:'適合按部就班慢慢推進，不要求快，可以做。'},
+  '雷澤歸妹':{action:'no',tip:'不建議衝動行事，此時去做容易不順利。'},
+  '雷火豐':{action:'go',tip:'正達到高峰，可以把握機會，但留意過後的轉折。'},
+  '火山旅':{action:'neutral',tip:'身處不熟悉的處境，宜謙和低調地進行。'},
+  '巽為風':{action:'go',tip:'適合以柔軟漸進的方式慢慢推進，可以做。'},
+  '兌為澤':{action:'go',tip:'人際和諧，適合透過溝通交流去做。'},
+  '風水渙':{action:'neutral',tip:'目前人心較為渙散，需要先凝聚共識再行動。'},
+  '水澤節':{action:'neutral',tip:'適度去做即可，過猶不及都不好。'},
+  '風澤中孚':{action:'go',tip:'只要出於真誠，這麼做會成功，值得去做。'},
+  '雷山小過':{action:'neutral',tip:'現在只適合做小事，不宜好高騖遠。'},
+  '水火既濟':{action:'neutral',tip:'階段性已經完成，但別鬆懈，要持續謹慎。'},
+  '火水未濟':{action:'wait',tip:'還沒有到終點，需要繼續努力堅持下去。'}
+};
+var ADVICE_STYLE={
+  go:{label:'✓ 傾向：可以進行',color:'var(--jade)',bg:'var(--jade-lt)'},
+  wait:{label:'⏳ 傾向：宜再等待',color:'var(--gold)',bg:'var(--gold-pale)'},
+  no:{label:'✗ 傾向：不建議此時進行',color:'var(--rust)',bg:'#fff0ee'},
+  neutral:{label:'◐ 傾向：中性，關鍵在做法',color:'var(--mist)',bg:'#f0f0f0'}
 };
 
 // ══════════════════════════════════════════════════════════
@@ -458,6 +575,16 @@ function doTarotDraw(name, question){
   html+='<p style="margin-top:4px;font-size:.78rem;color:rgba(255,255,255,.6)">牌陣：'+spread.name+'</p>';
   html+='</div></div>';
 
+  // 白話直接建議：用牌陣中最後一張牌（代表結果/未來走向）判斷整體傾向
+  var lastDraw=drawn[drawn.length-1];
+  var overallAction=getCardAction(lastDraw.card, lastDraw.reversed);
+  var ast=ADVICE_STYLE[overallAction];
+  html+='<div class="sec" style="background:'+ast.bg+';border-color:'+ast.color+';">';
+  html+='<div class="sec-body">';
+  html+='<p style="font-weight:700;color:'+ast.color+';font-size:.95rem;margin-bottom:6px;">'+ast.label+'</p>';
+  html+='<p style="font-size:.88rem">根據「'+lastDraw.position+'」抽到的「'+lastDraw.card.name+(lastDraw.reversed?'（逆位）':'（正位）')+'」，這是牌陣給你最直接的方向感。</p>';
+  html+='</div></div>';
+
   drawn.forEach(function(d,i){
     html+='<div class="tarot-card'+(d.reversed?' reversed':'')+'">';
     html+='<div class="tc-pos">位置 '+(i+1)+'：'+d.position+'</div>';
@@ -537,6 +664,16 @@ function doIchingCast(name, question){
   html+='<p style="margin-top:6px">問卜：「'+question+'」</p>';
   html+='</div></div>';
 
+  var advice=HEXAGRAM_ADVICE[benGua.name];
+  if(advice){
+    var st=ADVICE_STYLE[advice.action];
+    html+='<div class="sec" style="background:'+st.bg+';border-color:'+st.color+';">';
+    html+='<div class="sec-body">';
+    html+='<p style="font-weight:700;color:'+st.color+';font-size:.95rem;margin-bottom:6px;">'+st.label+'</p>';
+    html+='<p style="font-size:.88rem">'+advice.tip+'</p>';
+    html+='</div></div>';
+  }
+
   html+='<div class="sec"><div class="sec-head"><div class="sec-icon">☯</div>本卦：'+benGua.name+'</div><div class="sec-body">';
   html+='<div class="hexagram-lines">';
   for(var i=5;i>=0;i--){
@@ -556,6 +693,12 @@ function doIchingCast(name, question){
   if(hasMoving&&zhiGua){
     html+='<div class="sec"><div class="sec-head"><div class="sec-icon">➜</div>變卦：'+zhiGua.name+'</div><div class="sec-body">';
     html+='<p style="font-size:.82rem;color:var(--mist);margin-bottom:8px">動爻代表事情正在變化中，本卦看現況，變卦看未來的發展趨勢。</p>';
+    var zAdvice=HEXAGRAM_ADVICE[zhiGua.name];
+    if(zAdvice){
+      var zst=ADVICE_STYLE[zAdvice.action];
+      html+='<p style="font-weight:700;color:'+zst.color+';margin-bottom:6px;">未來趨勢'+zst.label+'</p>';
+      html+='<p style="font-size:.85rem;margin-bottom:8px;">'+zAdvice.tip+'</p>';
+    }
     html+='<p>'+zhiGua.judge+'</p>';
     html+='</div></div>';
   } else {
